@@ -1,0 +1,6 @@
+.env
+.venv/
+__pycache__/
+*.json
+ax_tree.json
+execution_plan.json 

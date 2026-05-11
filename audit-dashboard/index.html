@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GodHands — Deterministic Execution Audit Trail</title>
+    <meta name="description" content="Real-time audit dashboard for the GodHands deterministic AI web agent.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ── Reset & Base ─────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-deep:    #0a0a0f;
+            --bg-surface: #111118;
+            --bg-card:    #16161f;
+            --bg-hover:   #1e1e2a;
+            --border:     #2a2a3a;
+            --text:       #e0e0ec;
+            --text-dim:   #6b6b80;
+            --accent:     #7c5cfc;
+            --accent-glow:#7c5cfc44;
+            --green:      #34d399;
+            --green-dim:  #34d39933;
+            --yellow:     #fbbf24;
+            --yellow-dim: #fbbf2433;
+            --red:        #f87171;
+            --red-dim:    #f8717133;
+            --cyan:       #22d3ee;
+            --cyan-dim:   #22d3ee33;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ── Animated background grid ─────────────────────────── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 60px 60px;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Layout ───────────────────────────────────────────── */
+        .app {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* ── Header ───────────────────────────────────────────── */
+        header {
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, #0f0f18 0%, var(--bg-deep) 100%);
+            flex-shrink: 0;
+        }
+
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 0 24px var(--accent-glow);
+        }
+
+        .logo-text h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #fff, #c4b5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .status-badge.disconnected {
+            background: var(--red-dim);
+            color: var(--red);
+            border: 1px solid #f8717144;
+        }
+
+        .status-badge.connected {
+            background: var(--green-dim);
+            color: var(--green);
+            border: 1px solid #34d39944;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+            50% { opacity: 0.6; box-shadow: 0 0 8px 2px currentColor; }
+        }
+
+        /* ── Stats Bar ────────────────────────────────────────── */
+        .stats-bar {
+            display: flex;
+            gap: 12px;
+            padding: 14px 32px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-surface);
+            flex-shrink: 0;
+        }
+
+        .stat-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            transition: border-color 0.3s;
+        }
+
+        .stat-chip .label { color: var(--text-dim); }
+        .stat-chip .value { color: var(--text); font-weight: 700; }
+        .stat-chip.observe .value { color: var(--cyan); }
+        .stat-chip.think .value { color: var(--yellow); }
+        .stat-chip.act .value { color: var(--green); }
+
+        /* ── Terminal ─────────────────────────────────────────── */
+        .terminal-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px 32px 24px;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .terminal-dots span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .terminal-dots span:nth-child(1) { background: #f87171; }
+        .terminal-dots span:nth-child(2) { background: #fbbf24; }
+        .terminal-dots span:nth-child(3) { background: #34d399; }
+
+        .terminal-title {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+        }
+
+        .terminal {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow-y: auto;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            scroll-behavior: smooth;
+        }
+
+        .terminal::-webkit-scrollbar { width: 6px; }
+        .terminal::-webkit-scrollbar-track { background: transparent; }
+        .terminal::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .terminal::-webkit-scrollbar-thumb:hover { background: #3a3a4a; }
+
+        /* ── Log Lines ────────────────────────────────────────── */
+        .log-line {
+            padding: 4px 0;
+            display: flex;
+            gap: 12px;
+            animation: fade-in 0.3s ease-out;
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .log-time {
+            color: var(--text-dim);
+            flex-shrink: 0;
+            font-size: 11px;
+            padding-top: 2px;
+        }
+
+        .log-msg { white-space: pre-wrap; word-break: break-word; }
+
+        /* Phase coloring */
+        .log-msg.observe { color: var(--cyan); }
+        .log-msg.think   { color: var(--yellow); }
+        .log-msg.act     { color: var(--green); }
+        .log-msg.error   { color: var(--red); }
+        .log-msg.system  { color: var(--accent); }
+        .log-msg.success { color: var(--green); font-weight: 700; }
+        .log-msg.default { color: var(--text); }
+
+        /* ── Empty state ──────────────────────────────────────── */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 12px;
+            color: var(--text-dim);
+        }
+
+        .empty-state .icon {
+            font-size: 36px;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .empty-state p { font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- ─── Header ─────────────────────────────────────── -->
+        <header>
+            <div class="logo-group">
+                <div class="logo-icon">🤖</div>
+                <div class="logo-text">
+                    <h1>GodHands PoC: Deterministic Execution Audit Trail</h1>
+                    <p>Real-time agent telemetry · OBSERVE → THINK → ACT</p>
+                </div>
+            </div>
+            <div id="status-badge" class="status-badge disconnected">
+                <span class="status-dot"></span>
+                <span id="status-text">DISCONNECTED</span>
+            </div>
+        </header>
+
+        <!-- ─── Stats Bar ──────────────────────────────────── -->
+        <div class="stats-bar">
+            <div class="stat-chip">
+                <span class="label">Messages</span>
+                <span class="value" id="msg-count">0</span>
+            </div>
+            <div class="stat-chip observe">
+                <span class="label">OBSERVE</span>
+                <span class="value" id="observe-count">0</span>
+            </div>
+            <div class="stat-chip think">
+                <span class="label">THINK</span>
+                <span class="value" id="think-count">0</span>
+            </div>
+            <div class="stat-chip act">
+                <span class="label">ACT</span>
+                <span class="value" id="act-count">0</span>
+            </div>
+        </div>
+
+        <!-- ─── Terminal ───────────────────────────────────── -->
+        <div class="terminal-wrapper">
+            <div class="terminal-header">
+                <div class="terminal-dots"><span></span><span></span><span></span></div>
+                <span class="terminal-title">ws://localhost:8765 — audit stream</span>
+            </div>
+            <div class="terminal" id="terminal">
+                <div class="empty-state" id="empty-state">
+                    <div class="icon">📡</div>
+                    <p>Waiting for agent connection...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ─── DOM references ────────────────────────────────────
+        const terminal   = document.getElementById('terminal');
+        const emptyState = document.getElementById('empty-state');
+        const badge      = document.getElementById('status-badge');
+        const statusText = document.getElementById('status-text');
+        const msgCount     = document.getElementById('msg-count');
+        const observeCount = document.getElementById('observe-count');
+        const thinkCount   = document.getElementById('think-count');
+        const actCount     = document.getElementById('act-count');
+
+        let counts = { total: 0, observe: 0, think: 0, act: 0 };
+
+        // ─── Classify log messages by phase ────────────────────
+        function classify(msg) {
+            if (msg.includes('✅'))         return 'success';
+            if (msg.includes('✖') || msg.includes('⚠') || msg.toLowerCase().includes('error')) return 'error';
+            if (msg.includes('[OBSERVE]'))  return 'observe';
+            if (msg.includes('[THINK]'))    return 'think';
+            if (msg.includes('[ACT]'))      return 'act';
+            if (msg.includes('[WS]'))       return 'system';
+            return 'default';
+        }
+
+        // ─── Append a log line to the terminal ─────────────────
+        function appendLog(timestamp, message) {
+            // Hide empty state on first message
+            if (emptyState) emptyState.style.display = 'none';
+
+            const phase = classify(message);
+
+            // Update counters
+            counts.total++;
+            if (phase === 'observe') counts.observe++;
+            if (phase === 'think')   counts.think++;
+            if (phase === 'act')     counts.act++;
+
+            msgCount.textContent     = counts.total;
+            observeCount.textContent = counts.observe;
+            thinkCount.textContent   = counts.think;
+            actCount.textContent     = counts.act;
+
+            // Build log line element
+            const line = document.createElement('div');
+            line.className = 'log-line';
+
+            const time = document.createElement('span');
+            time.className = 'log-time';
+            const d = new Date(timestamp);
+            time.textContent = d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+            const msg = document.createElement('span');
+            msg.className = `log-msg ${phase}`;
+            msg.textContent = message;
+
+            line.appendChild(time);
+            line.appendChild(msg);
+            terminal.appendChild(line);
+
+            // Auto-scroll to bottom
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // ─── WebSocket connection with auto-reconnect ──────────
+        function connect() {
+            const ws = new WebSocket('ws://localhost:8765');
+
+            ws.addEventListener('open', () => {
+                badge.className = 'status-badge connected';
+                statusText.textContent = 'CONNECTED';
+            });
+
+            ws.addEventListener('message', (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    appendLog(data.timestamp, data.log);
+                } catch (e) {
+                    appendLog(new Date().toISOString(), event.data);
+                }
+            });
+
+            ws.addEventListener('close', () => {
+                badge.className = 'status-badge disconnected';
+                statusText.textContent = 'DISCONNECTED';
+                // Retry in 2 seconds
+                setTimeout(connect, 2000);
+            });
+
+            ws.addEventListener('error', () => {
+                ws.close();
+            });
+        }
+
+        // Kick off
+        connect();
+    </script>
+</body>
+</html>
