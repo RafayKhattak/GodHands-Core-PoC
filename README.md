@@ -16,7 +16,7 @@ https://github.com/user-attachments/assets/7d79bb01-f160-4793-99c8-fc457bebd6a0
 
 Proves the "Universal App Bridge" concept. Uses the Windows `UIAutomation` API to hook into native legacy desktop apps (e.g., `calc.exe`). Extracts the UIA control tree and triggers actions natively via `InvokePattern`—zero pixel-guessing required.
 
-> **[🎥 Insert Loom Video Link Here: Desktop Agent solving math on Windows Calculator]**
+https://github.com/user-attachments/assets/6010768e-b3ac-4a8d-b2e9-766b36e4234b
 
 ---
 
