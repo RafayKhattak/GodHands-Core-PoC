@@ -1,4 +1,4 @@
-# ⚡ Universal-AX-Bridge: Deterministic Execution Engine
+# ⚡ GodHands-Core-PoC: Deterministic Execution Engine
 
 A proof-of-concept AI agent infrastructure that abandons fragile vision-based (X/Y coordinate) clicking in favor of **OS-level memory handles** for zero-fail reliability across both Web and Native Desktop applications.
 
