@@ -26,25 +26,25 @@ Standard AI web agents fail because they rely on computer vision (pixels) or mas
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                        OBSERVE → THINK → ACT                          │
-│                                                                       │
-│  ┌─────────────────┐    ┌─────────────────┐    ┌──────────────────┐   │
-│  │    [OBSERVE]     │    │     [THINK]      │    │      [ACT]      │   │
-│  │                  │    │                  │    │                  │   │
-│  │  Chrome CDP      │───▶│  Groq LLM        │───▶│  CDP Commands   │   │
-│  │  AXTree Extract  │    │  llama-3.3-70b   │    │  DOM.focus      │   │
-│  │       or         │    │                  │    │  Input.insert   │   │
-│  │  Windows UIA     │    │  JSON Plan       │    │       or        │   │
-│  │  Control Tree    │    │  {actions: [...]} │    │  UIA Invoke     │   │
-│  └─────────────────┘    └─────────────────┘    └──────────────────┘   │
-│           │                                              │            │
-│           └──────────── WebSocket Telemetry ──────────────┘            │
-│                              ▼                                        │
-│                    ┌──────────────────┐                                │
-│                    │  Audit Dashboard │                                │
-│                    │  ws://localhost   │                                │
-│                    │     :8765        │                                │
-│                    └──────────────────┘                                │
+│                        OBSERVE → THINK → ACT                            │
+│                                                                         │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌──────────────────┐     │
+│  │    [OBSERVE]    │    │     [THINK]     │    │      [ACT]       │     │
+│  │                 │    │                 │    │                  │     │
+│  │  Chrome CDP     │───▶│  Groq LLM      │───▶│  CDP Commands    │     │
+│  │  AXTree Extract │    │  llama-3.3-70b  │    │  DOM.focus       │     │
+│  │       or        │    │                 │    │  Input.insert    │     │
+│  │  Windows UIA    │    │  JSON Plan      │    │       or         │     │
+│  │  Control Tree   │    │{actions: [...]} │    │  UIA Invoke      │     │
+│  └─────────────────┘    └─────────────────┘    └──────────────────┘     │
+│           │                                               │             │
+│           └──────────── WebSocket Telemetry ──────────────┘             │
+│                              ▼                                          │
+│                    ┌──────────────────┐                                 │
+│                    │  Audit Dashboard │                                 │
+│                    │  ws://localhost  │                                 │
+│                    │     :8765        │                                 │
+│                    └──────────────────┘                                 │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -217,13 +217,13 @@ Two reasons:
 
 ## 👨‍💻 About the Developer
 
-I'm **[Your Name]**, a recent Computer Science graduate from **FAST NUCES**, focusing on AI agent infrastructure, systems engineering, and deterministic automation.
+I'm **Rafay Khattak**, a recent Computer Science graduate from **FAST NUCES**, focusing on AI agent infrastructure, systems engineering, and deterministic automation.
 
 I built this over a weekend to demonstrate the massive reliability gap between probabilistic vision agents and deterministic OS-level execution.
 
 **If you are building the execution layer for the next generation of AI agents, I'd love to talk.**
 
-[LinkedIn](https://linkedin.com/in/yourprofile) · [Twitter/X](https://twitter.com/yourhandle)
+[LinkedIn](https://www.linkedin.com/in/rafaykhattak/) 
 
 ---
 
