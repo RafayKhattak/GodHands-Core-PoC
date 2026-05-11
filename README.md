@@ -137,8 +137,8 @@ GodHands YC F26/
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/universal-ax-bridge.git
-   cd universal-ax-bridge
+   git clone https://github.com/yourusername/GodHands-Core-PoC.git
+   cd GodHands-Core-PoC
    ```
 
 2. **Install dependencies:**
