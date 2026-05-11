@@ -10,7 +10,7 @@ Built as a technical exploration of the execution layer required for modern, ent
 
 Bypasses the HTML DOM entirely. Extracts the raw Accessibility Tree (AXTree) via the Chrome DevTools Protocol, maps intents via Groq (Llama-3.3-70b), and executes directly using ephemeral `backendDOMNodeId` memory pointers.
 
-> **[🎥 Insert Loom Video Link Here: Web Agent logging into Hacker News]**
+https://github.com/user-attachments/assets/7d79bb01-f160-4793-99c8-fc457bebd6a0
 
 ### 🖥️ The Desktop Agent (Windows UIA)
 
